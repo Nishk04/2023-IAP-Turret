@@ -24,6 +24,7 @@ public class RIOvision extends SubsystemBase{
     if (!pipeline.findBlobsOutput().empty()) {
         // Creates a rectangle around the target and gets the x coordinate of the center of rectangle
         Rect r = Imgproc.boundingRect(pipeline.findBlobsOutput().get(0, 0));
+        Rect c = Imgproc.circle(drawing, centers[i], (int) radius[i][0], color, 2)
         synchronized (imgLock) {
         centerX = r.x + (r.width / 2);
         }
