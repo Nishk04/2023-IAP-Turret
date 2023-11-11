@@ -4,18 +4,55 @@
 
 package frc.robot;
 
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
+
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.vision.VisionThread;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Pipelines.GripPipelineYellowBall;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+  
+  private static final int IMG_WIDTH = 320;
+  private static final int IMG_HEIGHT = 240;
+
+  private VisionThread visionThread;
+  private double centerX = 0.0;
+  private DifferentialDrive drive;
+  private PWMSparkMax left;
+  private PWMSparkMax right;
+
+  private final Object imgLock = new Object();
 
   private RobotContainer m_robotContainer;
 
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
+
+    visionThread = new VisionThread(camera, new GripPipelineYellowBall(), pipeline -> {
+      //Use find findBlobsOutput for blobs but findContourOutput for distinguishable lines
+        if (!pipeline.findBlobsOutput().empty()) {
+            Rect r = Imgproc.boundingRect(pipeline.findBlobsOutput()); //.get(0));
+            synchronized (imgLock) {
+                centerX = r.x + (r.width / 2);
+            }
+        }
+    });
+    visionThread.start();
+
+    left = new PWMSparkMax(0);
+    right = new PWMSparkMax(1);
+    drive = new DifferentialDrive(left, right);
   }
 
   @Override

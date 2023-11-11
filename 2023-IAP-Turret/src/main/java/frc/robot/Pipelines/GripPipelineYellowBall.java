@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.Pipelines;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.HashMap;
-import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.FastFeatureDetector;
 import org.opencv.core.*;
 import org.opencv.core.Core.*;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -234,7 +234,7 @@ public class GripPipelineYellowBall implements VisionPipeline {
 	 */
 	private void findBlobs(Mat input, double minArea, double[] circularity,
 		Boolean darkBlobs, MatOfKeyPoint blobList) {
-		FeatureDetector blobDet = FeatureDetector.create(FeatureDetector.SIMPLEBLOB);
+		FastFeatureDetector blobDet = FastFeatureDetector.create(FastFeatureDetector.FAST_N);
 		try {
 			File tempFile = File.createTempFile("config", ".xml");
 
